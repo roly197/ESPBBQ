@@ -1,22 +1,8 @@
 /*
-* ESP-DASH V2
-* Made by Ayush Sharma
-* Github URL: https://github.com/ayushsharma82/ESP-DASH
-* Support Me: https://www.patreon.com/asrocks5
-*
-* - Version Changelog - 
-* V1.0.0 - 11 Nov. 2017 - Library was Born
-* V1.0.1 - 13 Nov. 2017 - Fixed Empty SPIFFS Issue
-* V1.0.2 - 13 Nov. 2017 - Improvements on SPIFFS Issue
-* V1.0.3 - 24 Dec. 2017 - Pushing to Library Manager
-*
-* = Library Rewritten! =
-* V2.0.0 - 25 Jan 2019 - Wohoo! A breakthrough in performance and capabilities!
+* ESPBBQ
+* Made by Roly van Leersum
+* Github URL: https://github.com/roly197/ESPBBQ
 */
-
-// This Example is a Demo of Button Capability in ESP-DASH.
-// Open Dashboard after Uploading and Drag the Slider to see changes on Gauge Card
-
 
 #include <Arduino.h>
 #include <SPI.h>
