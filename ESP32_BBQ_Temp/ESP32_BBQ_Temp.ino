@@ -32,9 +32,6 @@ AsyncWebServer server(80);
 const char* ssid = ""; // Your WiFi SSID
 const char* password = ""; // Your WiFi Password
 
-
-"; // Your WiFi Password
-
 // Creating a thermocouple instance with software SPI on any three
 // digital IO pins.
 #define MAXDO   19
