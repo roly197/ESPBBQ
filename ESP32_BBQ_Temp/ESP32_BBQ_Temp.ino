@@ -2,50 +2,61 @@
 * ESPBBQ
 * Made by Roly van Leersum
 * Github URL: https://github.com/roly197/ESPBBQ
+* 
+* Pinout details:
+* 
+*      ESP32       
+*    DEVKIT V1
+*    |------|    R1
+*    | 3.3V |_--^^^^---|
+*    |      |          |
+*    |   VP |----------|
+*    |      |  R0(NTC) |
+*    |  GND |---^^^^---|
+*    |------|
+* 
+*     NTC B3950 Thermistor
+*     the formula for temp in kelvin is
+*                     1
+*     T = ----------------------------
+*         1/To + (1/beta) * ln(Rt/Ro)
+*    
+*     To determine Beta:
+*     R(t0) = resistance @ 273.15 Kelvin; Ice water (or 0 Celcius) 
+*     R(t1) = resistance @ 373.15 Kelvin: Boiling water (or 100 Celcius)
+*     Then: 
+*         Beta = ln(Rt1/Rt0)/(1/t1-1/t0)
+*    
+*     https://en.wikipedia.org/wiki/Thermistor
 */
 
 #include <Arduino.h>
-#include <SPI.h>
 #include <WiFi.h>
 
 #include <AsyncTCP.h>
 #include <ESPAsyncWebServer.h>
 #include <ESPDash.h>
-#include <Adafruit_MAX31855.h>
 
 AsyncWebServer server(80);
 
-const char* ssid = ""; // Your WiFi SSID
-const char* password = ""; // Your WiFi Password
+const char* ssid = "Bigdragon"; // Your WiFi SSID
+const char* password = "Unreal!!!"; // Your WiFi Password
 
-// Creating a thermocouple instance with software SPI on any three
-// digital IO pins.
-#define MAXDO   19
-#define MAXCS   5
-#define MAXCLK  18
+int ThermistorPin;
+double adcMax, Vs;
 
-// initialize the Thermocouple
-Adafruit_MAX31855 thermocouple(MAXCLK, MAXCS, MAXDO);
-
-// Example creating a thermocouple instance with hardware SPI
-// on a given CS pin.
-//#define MAXCS   10
-//Adafruit_MAX31855 thermocouple(MAXCS);
+double R1 = 32600.0;   // voltage divider resistor value (33k)
+double Beta = 3950.0;  // Beta value
+double To = 298.15;    // Temperature in Kelvin for 25 degree Celsius
+double Ro = 81000.0;   // Resistance of Thermistor at 25 degree Celsius
 
 
 void setup() {
     Serial.begin(115200);
 
-    //Setup MAX31855
-    Serial.println("MAX31855 test");
-    // wait for MAX chip to stabilize
-    delay(500);
-    Serial.print("Initializing sensor...");
-    if (!thermocouple.begin()) {
-      Serial.println("ERROR.");
-      while (1) delay(10);
-    }
-    Serial.println("DONE.");
+    ThermistorPin = A0;
+    adcMax = 4095.0;   // ADC resolution 10-bit (0-1023)
+    Vs = 3.3;          // supply voltage
 
     //Setup Wifi
     WiFi.mode(WIFI_STA);
@@ -64,21 +75,17 @@ void setup() {
 }
 
 void loop() {
-    // basic readout test, just print the current temp
-   Serial.print("Internal Temp = ");
-   Serial.println(thermocouple.readInternal());
+      double Vout, Rt = 0;
+      double T, Tc, Tf = 0;
 
-   double c = thermocouple.readCelsius();
-   if (isnan(c)) {
-     Serial.println("Something wrong with thermocouple!");
-     //Debug: display temp although reading is wrong... (remove later)
-     ESPDash.updateTemperatureCard("temp1", (int) c);
-   } else {
-     Serial.print("C = ");
-     Serial.println(c);
-     ESPDash.updateTemperatureCard("temp1", (int) c);
-   }
+      Vout = analogRead(ThermistorPin) * Vs/adcMax;
+      Rt = R1 * Vout / (Vs - Vout);
+      T = 1/(1/To + log(Rt/Ro)/Beta);  // Temperature in Kelvin
+      Tc = T - 273.15;                 // Celsius
+      Tf = Tc * 9 / 5 + 32;            // Fahrenheit
+      Serial.println(Tc);
+      ESPDash.updateTemperatureCard("temp1", int (Tc));
+      Serial.println(analogRead(ThermistorPin));
 
-   delay(1000);
-
+      delay(2000);
 }
