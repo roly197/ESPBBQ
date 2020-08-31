@@ -39,8 +39,8 @@
 
 AsyncWebServer server(80);
 
-const char* ssid = "Bigdragon"; // Your WiFi SSID
-const char* password = "Unreal!!!"; // Your WiFi Password
+const char* ssid = ""; // Your WiFi SSID
+const char* password = ""; // Your WiFi Password
 
 int ThermistorPin;
 double adcMax, Vs;
